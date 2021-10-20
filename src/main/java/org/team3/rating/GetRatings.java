@@ -1,4 +1,4 @@
-package org.team3.ranking;
+package org.team3.rating;
 
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
