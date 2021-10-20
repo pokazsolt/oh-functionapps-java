@@ -27,11 +27,14 @@ public class CreateRating {
             @CosmosDBOutput(name = "database",
               databaseName = "Ratings",
               collectionName = "RatingItems",
-              connectionStringSetting = "AzureCosmosDBConnection")
+              connectionStringSetting = "AzureCosmosDBConnection",
+              createIfNotExists = true)
             OutputBinding<String> outputItem,
             final ExecutionContext context) throws JsonProcessingException {
 
         context.getLogger().info("Java HTTP trigger processed a request.");
+
+
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -39,20 +42,24 @@ public class CreateRating {
 
         context.getLogger().info("Received request JSON payload: " + ratingItemStr);
 
-        RatingItem ratingItem = mapper.readValue(ratingItemStr, RatingItem.class);
+        try {
+            RatingItem ratingItem = mapper.readValue(ratingItemStr, RatingItem.class);
 
-        if (ratingItem == null) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please provide valid ratingItem json").build();
-        } else {
-            ratingItem.setId(UUID.randomUUID().toString());
-            ratingItem.setTimestamp(Instant.now().toString());
+            if (ratingItem == null) {
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please provide valid ratingItem json").build();
+            } else {
+                ratingItem.setId(UUID.randomUUID().toString());
+                ratingItem.setTimestamp(Instant.now().toString());
 
-            String ratingItemJson = mapper.writeValueAsString(ratingItem);
-            context.getLogger().info("RatingItem to be persisted: " + ratingItemJson);
-            outputItem.setValue(ratingItemJson);
-            
+                String ratingItemJson = mapper.writeValueAsString(ratingItem);
+                context.getLogger().info("RatingItem to be persisted: " + ratingItemJson);
+                outputItem.setValue(ratingItemJson);
+                
+                return request.createResponseBuilder(HttpStatus.OK).body(ratingItemJson).build();
+            }
 
-            return request.createResponseBuilder(HttpStatus.OK).body(ratingItemJson).build();
+        } catch (Exception e) {
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Rating should be between 0 and 5").build();
         }
     }
 }
