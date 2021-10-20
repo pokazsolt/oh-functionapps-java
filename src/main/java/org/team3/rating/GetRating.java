@@ -3,7 +3,6 @@ package org.team3.rating;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -28,15 +27,21 @@ public class GetRating {
             final ExecutionContext context) {
         context.getLogger().info("Java HTTP trigger processed a request.");
 
-        System.out.println(ratingItem.toString());
+        // System.out.println(ratingItem.toString());
 
         ObjectMapper mapper = new ObjectMapper();
+
+        // context.
+
+        if ( ratingItem == null ) {
+            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Rating not found").build();
+        }
 
         try {
             String ratingItemString = mapper.writeValueAsString(ratingItem);
             return request.createResponseBuilder(HttpStatus.FOUND).header("Content-Type", "application/json").body(ratingItemString).build();
-        } catch (JsonProcessingException e) {
-            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server erro").build();
+        } catch (Exception e) {
+            return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Error").build();
         }
     }
 }
