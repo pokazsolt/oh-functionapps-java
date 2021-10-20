@@ -13,7 +13,7 @@ import com.microsoft.azure.functions.*;
 public class CreateRating {
 
 
-    //public static final String CONN_STRING = System.getenv("COSMOS_DB_CONN_STRING").toString();
+    // public static final String CONN_STRING = System.getenv("COSMOS_DB_CONN_STRING").toString();
 
     /**
      * This function listens at endpoint "/api/CreateRating". Two ways to invoke it using "curl" command in bash:
@@ -27,7 +27,7 @@ public class CreateRating {
             @CosmosDBOutput(name = "database",
               databaseName = "Ratings",
               collectionName = "RatingItems",
-              connectionStringSetting = "TBA")
+              connectionStringSetting = "AzureCosmosDBConnection")
             OutputBinding<String> outputItem,
             final ExecutionContext context) throws JsonProcessingException {
 
