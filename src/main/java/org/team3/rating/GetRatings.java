@@ -27,7 +27,7 @@ public class GetRatings {
 
         // context.
 
-        if ( ratingItems == null ) {
+        if ( ratingItems == null || ratingItems.length == 0 ) {
             return request.createResponseBuilder(HttpStatus.NOT_FOUND).body("Rating not found").build();
         }
 
