@@ -6,6 +6,7 @@ import com.microsoft.azure.functions.annotation.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -74,16 +75,22 @@ public class CreateRating {
 
     private boolean isProductIdValid(String produdctId) {
         RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<Object> response = restTemplate.getForEntity(PRODUCT_SERVICE_URL_PREFIX + produdctId, Object.class);
+            return response.getStatusCode().equals(HttpStatus.OK);
+        } catch (HttpClientErrorException e) {
+            return false;
+        }
         
-        ResponseEntity<Object> response = restTemplate.getForEntity(PRODUCT_SERVICE_URL_PREFIX + produdctId, Object.class);
-
-        return response.getStatusCode().equals(HttpStatus.OK);
     }
 
     private boolean isUserIdValid(String userId) {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Object> response = restTemplate.getForEntity(USER_SERVICE_URL_PREFIX + userId, Object.class);
-
-        return response.getStatusCode().equals(HttpStatus.OK);
+        try {
+            ResponseEntity<Object> response = restTemplate.getForEntity(USER_SERVICE_URL_PREFIX + userId, Object.class);
+            return response.getStatusCode().equals(HttpStatus.OK);
+        } catch (HttpClientErrorException e) {
+            return false;
+        }
     }
 }
