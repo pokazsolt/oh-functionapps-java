@@ -3,6 +3,10 @@ package org.team3.ranking;
 import java.time.Instant;
 import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.functions.*;
@@ -12,9 +16,9 @@ import com.microsoft.azure.functions.*;
  */
 public class CreateRating {
 
-
-    // public static final String CONN_STRING = System.getenv("COSMOS_DB_CONN_STRING").toString();
-
+    private static final String USER_SERVICE_URL_PREFIX = "https://serverlessohapi.azurewebsites.net/api/GetUser?userId=";
+    private static final String PRODUCT_SERVICE_URL_PREFIX = "https://serverlessohapi.azurewebsites.net/api/GetProduct?productId=";
+    
     /**
      * This function listens at endpoint "/api/CreateRating". Two ways to invoke it using "curl" command in bash:
      * 1. curl -d "HTTP Body" {your host}/api/CreateRating
@@ -48,6 +52,11 @@ public class CreateRating {
             if (ratingItem == null) {
                 return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please provide valid ratingItem json").build();
             } else {
+
+                if (isProductIdValid(ratingItem.getProductId()) && isUserIdValid(ratingItem.getUserId()))) {
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("ProductId or userId does not exist.").build();
+                } 
+
                 ratingItem.setId(UUID.randomUUID().toString());
                 ratingItem.setTimestamp(Instant.now().toString());
 
@@ -61,5 +70,21 @@ public class CreateRating {
         } catch (Exception e) {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Rating should be between 0 and 5").build();
         }
+    }
+
+
+    private boolean isProductIdValid(String produdctId) {
+        RestTemplate restTemplate = new RestTemplate();
+        
+        ResponseEntity<Object> response = restTemplate.getForEntity(PRODUCT_SERVICE_URL_PREFIX + produdctId, Object.class);
+
+        return response.getStatusCode().equals(HttpStatus.OK);
+    }
+
+    private boolean isUserIdValid(String userId) {
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<Object> response = restTemplate.getForEntity(USER_SERVICE_URL_PREFIX + userId, Object.class);
+
+        return response.getStatusCode().equals(HttpStatus.OK);
     }
 }
