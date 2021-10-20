@@ -5,6 +5,7 @@ import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,8 +39,6 @@ public class CreateRating {
 
         context.getLogger().info("Java HTTP trigger processed a request.");
 
-
-
         ObjectMapper mapper = new ObjectMapper();
 
         String ratingItemStr = request.getBody().orElse(null);
@@ -50,11 +49,11 @@ public class CreateRating {
             RatingItem ratingItem = mapper.readValue(ratingItemStr, RatingItem.class);
 
             if (ratingItem == null) {
-                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Please provide valid ratingItem json").build();
+                return request.createResponseBuilder(com.microsoft.azure.functions.HttpStatus.BAD_REQUEST).body("Please provide valid ratingItem json").build();
             } else {
 
-                if (isProductIdValid(ratingItem.getProductId()) && isUserIdValid(ratingItem.getUserId()))) {
-                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("ProductId or userId does not exist.").build();
+                if ( !isProductIdValid(ratingItem.getProductId()) || !isUserIdValid(ratingItem.getUserId()) ) {
+                    return request.createResponseBuilder(com.microsoft.azure.functions.HttpStatus.BAD_REQUEST).body("ProductId or userId does not exist.").build();
                 } 
 
                 ratingItem.setId(UUID.randomUUID().toString());
@@ -64,11 +63,11 @@ public class CreateRating {
                 context.getLogger().info("RatingItem to be persisted: " + ratingItemJson);
                 outputItem.setValue(ratingItemJson);
                 
-                return request.createResponseBuilder(HttpStatus.OK).body(ratingItemJson).build();
+                return request.createResponseBuilder(com.microsoft.azure.functions.HttpStatus.OK).body(ratingItemJson).build();
             }
 
         } catch (Exception e) {
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("Rating should be between 0 and 5").build();
+            return request.createResponseBuilder(com.microsoft.azure.functions.HttpStatus.BAD_REQUEST).body("Rating should be between 0 and 5").build();
         }
     }
 
